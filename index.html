@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trigonometric Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #121212; /* Dark background for dark mode */
+            color: #ffffff; /* White text for contrast */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0; /* Remove default margin */
+        }
+        
+        .calculator {
+            background-color: #1e1e1e; /* Darker background for the calculator */
+            border-radius: 15px;
+            padding: 20px;
+            width: 400px; /* Width for the calculator */
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5); /* Enhanced shadow for depth */
+            text-align: center; /* Center-align text */
+        }
+
+        .display {
+            background-color: #222; /* Dark background for display */
+            border-radius: 10px;
+            padding: 10px;
+            font-size: 30px; /* Font size for display text */
+            text-align: right;
+            margin-bottom: 20px;
+            height: 50px; /* Height for display */
+            line-height: 50px; /* Align text vertically */
+            color: #00bae2; /* Bright color for display text */
+            overflow: hidden; /* Prevent overflow */
+            white-space: nowrap; /* Prevent text wrapping */
+            text-overflow: ellipsis; /* Show ellipsis when text is too long */
+        }
+
+        .button {
+            width: 80px; /* Button width */
+            height: 80px; /* Button height */
+            margin: 5px;
+            border-radius: 10px;
+            border: none;
+            background-color: #333; /* Dark button background */
+            color: white;
+            font-size: 28px; /* Button font size */
+            cursor: pointer;
+            transition: background-color 0.3s; /* Smooth transition effect */
+        }
+
+        .button:hover {
+            background-color: #444; /* Lighter shade on hover */
+        }
+
+        .trig-button {
+            background-color: #00bae2; /* Bright color for trig buttons */
+            padding: 15px; /* Added padding for better touch targets */
+            border-radius: 10px; /* Ensures trig buttons have rounded corners */
+            color: white; /* Text color for trig buttons */
+        }
+
+        .trig-button:hover {
+            background-color: #00a0d1; /* Lighter shade on hover */
+        }
+
+        .operation-button {
+            background-color: #ff9f00; /* Bright orange for operation buttons */
+        }
+
+        .operation-button:hover {
+            background-color: #cc7f00; /* Darker orange on hover */
+        }
+
+        .hidden {
+            display: none; /* Hide elements with this class */
+        }
+
+        .button-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="calculator">
+        <div class="display" id="display">0</div>
+        <div class="button-container">
+            <button class="button" onclick="clearDisplay()">C</button>
+            <button class="button" onclick="appendToDisplay('7')">7</button>
+            <button class="button" onclick="appendToDisplay('8')">8</button>
+            <button class="button" onclick="appendToDisplay('9')">9</button>
+            <button class="button operation-button" onclick="setOperation('/')">÷</button>
+            <button class="button" onclick="appendToDisplay('4')">4</button>
+            <button class="button" onclick="appendToDisplay('5')">5</button>
+            <button class="button" onclick="appendToDisplay('6')">6</button>
+            <button class="button operation-button" onclick="setOperation('*')">×</button>
+            <button class="button" onclick="appendToDisplay('1')">1</button>
+            <button class="button" onclick="appendToDisplay('2')">2</button>
+            <button class="button" onclick="appendToDisplay('3')">3</button>
+            <button class="button operation-button" onclick="setOperation('-')">-</button>
+            <button class="button" onclick="appendToDisplay('0')">0</button>
+            <button class="button" onclick="calculateResult()">=</button>
+            <!-- Trigonometric buttons with padding and lighter color -->
+            <button class="trig-button hidden" id="sinButton" onclick="setTrigFunction('sin')">sin</button>
+            <button class="trig-button hidden" id="cosButton" onclick="setTrigFunction('cos')">cos</button>
+            <button class="trig-button hidden" id="tanButton" onclick="setTrigFunction('tan')">tan</button>
+        </div>
+        <div class="button-container">
+            <!-- Change button text to 'Trig' -->
+            <button class="button" onclick="showTrigonometricButtons()">Trig</button>
+        </div>
+    </div>
+
+    <script>
+        let displayValue = '';
+        let operation = null;
+        let trigFunction = null;
+
+        function appendToDisplay(value) {
+            if (displayValue === '0') displayValue = '';
+            displayValue += value;
+            updateDisplay();
+        }
+
+        function setOperation(op) {
+            if (trigFunction) {
+                calculateResult();
+            }
+            operation = op;
+            displayValue += ' ' + op + ' ';
+            hideTrigonometricButtons(); // Hide trig buttons when setting an operation
+            updateDisplay();
+        }
+
+        function setTrigFunction(func) {
+            trigFunction = func;
+            displayValue += ' ' + func + ' ';
+            updateDisplay();
+        }
+
+        function calculateResult() {
+            try {
+                let result;
+                const numbers = displayValue.split(' ');
+                const firstNumber = parseFloat(numbers[0]);
+                const secondNumber = parseFloat(numbers[2]);
+
+                if (trigFunction) {
+                    const radians = secondNumber * (Math.PI / 180); // Convert degrees to radians
+                    if (trigFunction === 'sin') {
+                        result = Math.sin(radians);
+                    } else if (trigFunction === 'cos') {
+                        result = Math.cos(radians);
+                    } else if (trigFunction === 'tan') {
+                        result = Math.tan(radians);
+                    }
+                    trigFunction = null; // Reset trig function after calculation
+                } else {
+                    if (operation === '+') {
+                        result = firstNumber + secondNumber;
+                    } else if (operation === '-') {
+                        result = firstNumber - secondNumber;
+                    } else if (operation === '*') {
+                        result = firstNumber * secondNumber;
+                    } else if (operation === '/') {
+                        result = firstNumber / secondNumber;
+                    }
+                }
+
+                displayValue = result.toString();
+                updateDisplay();
+            } catch (error) {
+                displayValue = 'Error';
+                updateDisplay();
+            }
+        }
+
+        function clearDisplay() {
+            displayValue = '0';
+            operation = null;
+            trigFunction = null;
+            hideTrigonometricButtons(); // Hide trig buttons when clearing display
+            updateDisplay();
+        }
+
+        function updateDisplay() {
+            document.getElementById('display').textContent = displayValue;
+        }
+
+        function showTrigonometricButtons() {
+            document.getElementById('sinButton').classList.remove('hidden');
+            document.getElementById('cosButton').classList.remove('hidden');
+            document.getElementById('tanButton').classList.remove('hidden');
+        }
+
+        function hideTrigonometricButtons() {
+            document.getElementById('sinButton').classList.add('hidden');
+            document.getElementById('cosButton').classList.add('hidden');
+            document.getElementById('tanButton').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
